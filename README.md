@@ -3,6 +3,6 @@
 ## Texas Tech University
 
 
-# bam - readsmapping
-# vcf - variants calling
+  #### bam - readsmapping
+  #### vcf - variants calling
 
