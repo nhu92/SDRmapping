@@ -141,3 +141,79 @@ raw.snp.longer <- raw.snp.drop %>%
 head(raw.snp.longer)
 ```
 
+We made an assumptions here. We assume the sex ration of *Salix nigra* is 1:1. Thus, we would expected if one SNP is related to sex, in our population, it should appear to have a ratio between homozygotic and heterozygotic genotype near 1:1. Thus, we could make a simple chi-square test on the ratio of homo:hetero = 1:1. We will filter out all the site that are significantly far away from this ratio (p < 0.05). The rest SNPs will be candidates for assigning gender.
+```R
+# count genotypes of each position
+snp.geno.sum <- full_join(raw.snp.longer %>% 
+                            filter(value == "0|0") %>% 
+                            group_by(POS) %>% 
+                            summarise(ref_homo = n()),
+                      raw.snp.longer %>% 
+                        filter(value == "1|1") %>% 
+                        group_by(POS) %>% 
+                        summarise(alt_homo = n()), by = "POS") %>%
+  full_join(raw.snp.longer %>% 
+              filter(value == "0|1" | value == "1|0") %>% 
+              group_by(POS) %>% 
+              summarise(het = n()), by = "POS")
+
+snp.geno.sum[is.na(snp.geno.sum)] <- 0
+
+# calculate expected genotype ratio
+snp.geno.exp <- raw.snp.drop %>% 
+  mutate(exp_homo = (length(raw.snp.drop[1, ]) - 2) / 2) %>% 
+  mutate(exp_het = (length(raw.snp.drop[1, ]) - 2) / 2)
+
+# do a chi-square test
+snp.chisq <- left_join(snp.geno.exp, snp.geno.sum, by = "POS") %>% 
+  mutate(act_homo = ref_homo + alt_homo) %>%
+  rowwise() %>% 
+  mutate(chisq_stat = chisq.test(c(act_homo, het))$statistic, 
+         p_val = chisq.test(c(act_homo, het))$p.value)
+
+# filter SNPs that p <= 0.05
+# only extract SNPs that homozygotic sites only refer to "0|0" or "1|1", no either 
+snp.p_gt_0.05 <- snp.chisq %>% 
+  filter(p_val > 0.05) %>% 
+  filter(ref_homo == 0 | alt_homo == 0)
+
+# further cleaning, remove calculations
+snp.pre_sex <- snp.p_gt_0.05 %>% 
+  select(-ref_homo, -alt_homo, -exp_het, 
+         -exp_homo, -act_homo, -chisq_stat, 
+         -p_val, -het, -ALT)
+```
+
+We assume males are heterozygotes while females are all homozygotes on these SNPs. Then, we can check how many proportion of these SNPs agrees with males or females.
+```R
+# assign putative sex
+snp.pre_sex[snp.pre_sex == "0|0"] = "F"
+snp.pre_sex[snp.pre_sex == "1|1"] = "F"
+snp.pre_sex[snp.pre_sex == "0|1"] = "M"
+snp.pre_sex[snp.pre_sex == "1|0"] = "M"
+head(snp.pre_sex)
+
+# count "F"s and "M"s for each individuals
+snp.pre_sex.longer <- snp.pre_sex %>% 
+  pivot_longer(cols = c(-POS), names_to = "IDV")
+agree_prop <- full_join(snp.pre_sex.longer %>% 
+                          filter(value == "F") %>%
+                          group_by(IDV) %>% 
+                          summarise(pr.f = n()), 
+                        snp.pre_sex.longer %>% 
+                          filter(value == "M") %>% 
+                          group_by(IDV) %>% 
+                          summarise(pr.m = n()), by = "IDV")
+agree_prop[is.na(agree_prop)] <- 0
+
+# assign gender only when 90% of SNP agree with specific gender
+sex.out.table <- agree_prop %>% 
+  mutate(pr.female = pr.f / (pr.f + pr.m)) %>% 
+  mutate(gender = ifelse(pr.female > 0.9, "F", 
+                         ifelse(pr.female < 0.1, "M", "UnK"))) %>%
+  select(IDV, gender)
+
+# output file
+write.csv(sex.out.table, "snigra.individual.sex.csv")
+```
+Now we will get a ```snigra.individual.sex.csv``` file contains gender information of each individuals. These results were examined by around 20 individuals known for sex.
