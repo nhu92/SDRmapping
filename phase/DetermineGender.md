@@ -113,7 +113,10 @@ The output of this is ```snigra.SLR.out.vcf.gz```. We can use ```gunzip snigra.S
 
 Before analyzing the data, we have several cleaning steps to form a ```.csv``` file.
 ```bash
-tail -n +10 snigra.SLR.out.vcf | sed 's/#CHROM/CHROM/g' | sed 's/\t/\",\"/g' > snigra_raw.csv
+tail -n +10 snigra.SLR.out.vcf > snigra.SLR.out.vcf.noinfo
+head -n 1 snigra.SLR.out.vcf.noinfo | sed 's/#CHROM/CHROM/g' > snigra_raw.header
+tail -n +2 snigra.SLR.out.vcf.noinfo  | sed 's/\t/\",\"/g' | tr '\n' '"' | sed 's/Chr/\n\"Chr/g' > snigra_raw.body
+cat snigra_raw.header snigra_raw.body | sed 's/\t/,/g' > snigra_raw.csv
 ```
 This is the input file for Step 3 R scripts.
 
