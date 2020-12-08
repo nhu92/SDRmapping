@@ -1,8 +1,10 @@
-# SDRmapping workflow for Salix exigua 
-# (using Fst analysis)
+# SDR Mapping Project
 Nan Hu
+
 Department of Biological Sciences
+
 Texas Tech University
+
 ---
 **Folders:**
 1. **bam** - reads mapping
