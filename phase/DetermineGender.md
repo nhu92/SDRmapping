@@ -70,7 +70,7 @@ gatk SelectVariants \
 ```
 The output of these code will be ```snigra.SLR.reduced.vcf```.
 
-Since our aim is to find a set of SNPs consistantly having the same genotypes in one gender and having distinct genotypes in another, it is fine for us to do some stringent filtering criterions. Here, we want to remove all the SNPs that containing missing genotype callings. (Although we could keep them but we still need to control the maxium nocall fractions. In previous step we set it to 0.25 which is safe enough and will not affect the gender determination work actually. However, here we only keep SNPs that every individuals having calls to minimize our input datasets.)
+Since our aim is to find a set of SNPs consistantly having the same genotypes in one gender and having distinct genotypes in another, it is fine for us to do some stringent filtering criterions. Here, we want to remove all the SNPs that containing missing genotype callings. (Although we could keep them, we still need to control the maxium nocall fractions. In previous step we set it to 0.25, which is safe enough and will not affect the gender determination work actually. However, here we only keep SNPs that every individuals having calls to minimize our input datasets.)
 ```bash
 #!/bin/sh
 #$ -V
