@@ -91,7 +91,7 @@ vcftools --vcf ./vcf/snigra.SLR.reduced.vcf \
 The output file will be ```snigra.SLR.reduced.nomissing.recode.vcf```. This is ready for BEAGLE software as input.
 
 ## Step 2: Convert to BEAGLE format
-This step is using BEAGLE software to convert ```.vcf``` file intop BEAGLE format. The BEAGLE format is a tablized genotype table by extracting ```gt``` field of ```.vcf``` file. Parameter ```ne``` is the effective population size. We use default settings here since we only want convert format, we use ```gt``` field as input to avoid unnecessary phasing process.
+This step is using BEAGLE software to convert ```.vcf``` file into BEAGLE format. The BEAGLE format is a tablized genotype table by extracting ```gt``` field of ```.vcf``` file. Parameter ```ne``` is the effective population size. We use default settings here since we only want convert format, we use ```gt``` field as input to avoid unnecessary phasing process.
 ```bash
 #!/bin/sh
 #$ -V
