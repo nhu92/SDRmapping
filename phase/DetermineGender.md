@@ -45,7 +45,7 @@ vcftools --vcf ./vcf/snigra.all.snps.vcf \
 Output file will be ```snigra.SLR.recode.vcf```.
 
 Follwing scripts are removing filtered SNPs from the ```.vcf``` file to reduce the size of ```.vcf``` file. vcftools could do the same job but in order to be consistent from filtering steps, we suggest to use ```gatk SelectVariants``` to remove the redundant rows.
-If reference genome has not been indexed and dictionaried. Please run [these command](https://gatk.broadinstitute.org/hc/en-us/articles/360035531652-FASTA-Reference-genome-format) to prepare.
+If reference genome has not been indexed and dictionaried. Please run [these commands](https://gatk.broadinstitute.org/hc/en-us/articles/360035531652-FASTA-Reference-genome-format) to prepare.
 ```allnames.txt``` is a list of individual names in data set. We add ```--allow-nonoverlapping-command-line-samples``` option here so the list can be different from individuals names in ```.vcf``` file. It will only bring up names overlapped.
 ```bash
 #!/bin/sh
