@@ -175,7 +175,7 @@ snp.chisq <- left_join(snp.geno.exp, snp.geno.sum, by = "POS") %>%
          p_val = chisq.test(c(act_homo, het))$p.value)
 
 # filter SNPs that p <= 0.05
-# only extract SNPs that homozygotic sites only refer to "0|0" or "1|1", no either 
+# only extract SNPs that homozygotic sites only refer to "0|0" or "1|1", not both
 snp.p_gt_0.05 <- snp.chisq %>% 
   filter(p_val > 0.05) %>% 
   filter(ref_homo == 0 | alt_homo == 0)
