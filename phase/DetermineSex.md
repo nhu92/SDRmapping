@@ -1,4 +1,4 @@
-# Determine gender in population data sets of *Salix nigra*
+# Determine the sex in population data sets of *Salix nigra*
 Nan Hu
 
 Dec. 06, 2020
