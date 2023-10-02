@@ -5,8 +5,8 @@ Dec. 06, 2020
 
 ---
 
-This idea was come up from the demand that we want to know the gender of Minghao's *Salix nigra* sample for further analysis.
-However, because of late sampling season, it was unable to check individuals gender by that time. 
+This idea was come up from the demand that we want to know the sex of Minghao's *Salix nigra* sample for further analysis.
+However, because of late sampling season, it was unable to check individuals sex by that time. 
 Therefore, here we designed this workflow to identify sex in this sampling population using SNPs called from target sequencing data.
 
 Here are software used in this analysis:
@@ -70,7 +70,7 @@ gatk SelectVariants \
 ```
 The output of these code will be ```snigra.SLR.reduced.vcf```.
 
-Since our aim is to find a set of SNPs consistantly having the same genotypes in one gender and having distinct genotypes in another, it is fine for us to do some stringent filtering criterions. Here, we want to remove all the SNPs that containing missing genotype callings. (Although we could keep them, we still need to control the maxium nocall fractions. In previous step we set it to 0.25, which is safe enough and will not affect the gender determination work actually. However, here we only keep SNPs that every individuals having calls to minimize our input datasets.)
+Since our aim is to find a set of SNPs consistantly having the same genotypes in one sex and having distinct genotypes in another, it is fine for us to do some stringent filtering criterions. Here, we want to remove all the SNPs that containing missing genotype callings. (Although we could keep them, we still need to control the maxium nocall fractions. In previous step we set it to 0.25, which is safe enough and will not affect the sex determination work actually. However, here we only keep SNPs that every individuals having calls to minimize our input datasets.)
 ```bash
 #!/bin/sh
 #$ -V
@@ -120,7 +120,7 @@ cat snigra_raw.header snigra_raw.body | sed 's/\t/,/g' > snigra_raw.csv
 ```
 This is the input file for Step 3 R scripts.
 
-## Step 3: Gender Assignment and Output
+## Step 3: Sex Assignment and Output
 In this step, we will take input table to run some statistical test to find the potential sex linked SNPs.
 ```R
 library(dplyr)
@@ -144,7 +144,7 @@ raw.snp.longer <- raw.snp.drop %>%
 head(raw.snp.longer)
 ```
 
-We made an assumptions here. We assume the sex ration of *Salix nigra* is 1:1. Thus, we would expected if one SNP is related to sex, in our population, it should appear to have a ratio between homozygotic and heterozygotic genotype near 1:1. Thus, we could make a simple chi-square test on the ratio of homo:hetero = 1:1. We will filter out all the site that are significantly far away from this ratio (p < 0.05). The rest SNPs will be candidates for assigning gender.
+We made an assumptions here. We assume the sex ration of *Salix nigra* is 1:1. Thus, we would expected if one SNP is related to sex, in our population, it should appear to have a ratio between homozygotic and heterozygotic genotype near 1:1. Thus, we could make a simple chi-square test on the ratio of homo:hetero = 1:1. We will filter out all the site that are significantly far away from this ratio (p < 0.05). The rest SNPs will be candidates for assigning sex.
 ```R
 # count genotypes of each position
 snp.geno.sum <- full_join(raw.snp.longer %>% 
@@ -209,14 +209,14 @@ agree_prop <- full_join(snp.pre_sex.longer %>%
                           summarise(pr.m = n()), by = "IDV")
 agree_prop[is.na(agree_prop)] <- 0
 
-# assign gender only when 90% of SNP agree with specific gender
+# assign sex only when 90% of SNP agree with specific sex
 sex.out.table <- agree_prop %>% 
   mutate(pr.female = pr.f / (pr.f + pr.m)) %>% 
-  mutate(gender = ifelse(pr.female > 0.9, "F", 
+  mutate(sex = ifelse(pr.female > 0.9, "F", 
                          ifelse(pr.female < 0.1, "M", "UnK"))) %>%
-  select(IDV, gender)
+  select(IDV, sex)
 
 # output file
 write.csv(sex.out.table, "snigra.individual.sex.csv")
 ```
-Now we will get a ```snigra.individual.sex.csv``` file contains gender information of each individuals. These results were examined by around 20 individuals known for sex.
+Now we will get a ```snigra.individual.sex.csv``` file contains the sex information of each individuals. These results were examined by around 20 individuals known for sex.
